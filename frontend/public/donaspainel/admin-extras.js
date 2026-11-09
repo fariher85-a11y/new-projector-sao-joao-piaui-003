@@ -1,5 +1,5 @@
 /* ============================================================
-   Painel Admin — extras (Concurso Várzea Grande - MT)
+   Painel Admin — extras (Seletivo São João do Piauí)
    Adiciona um botão "Limpar Cadastros" na página /donaspainel/cadastro
    sem precisar mexer no build React.
    ============================================================ */
