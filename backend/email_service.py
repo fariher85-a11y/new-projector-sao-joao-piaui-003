@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 # Proxy gerenciado da Emergent. É uma CONSTANTE — nunca ler do os.environ.
 EMAIL_BASE_URL = "https://integrations.emergentagent.com"
 EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY")
-EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Concurso Várzea Grande - MT")
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Seletivo São João do Piauí")
 # BYOK Resend (conta própria do usuário). Se definido, usa Resend direto.
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-RESEND_FROM = os.environ.get("RESEND_FROM")  # ex: "Concurso Várzea Grande - MT <contato@selecon.org.br>"
+RESEND_FROM = os.environ.get("RESEND_FROM")  # ex: "Seletivo São João do Piauí <contato@dominio>"
 _raw_reply = (os.environ.get("EMAIL_REPLY_TO") or "").strip()
 # Só aceita um e-mail bem formado (ignora placeholders tipo "não sei o que é isso")
 EMAIL_REPLY_TO = _raw_reply if re.match(r"^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$", _raw_reply) else None
@@ -39,19 +39,33 @@ EMAIL_LOGO_URL = os.environ.get("EMAIL_LOGO_URL", "")
 CONTATO_EMAIL = EMAIL_REPLY_TO or ""
 
 # Nome completo do concurso exibido no corpo do e-mail
-CONCURSO_NOME = "Processo Seletivo nº 001/2026 – SMECEL/VG/MT"
-ORGAO = "SMECEL - Várzea Grande - MT"
-ORGANIZADORA = "Concurso Várzea Grande - MT"
-EDITAL = "Processo Seletivo nº 001/2026/GS/SMECEL/VG/MT"
+CONCURSO_NOME = "Seletivo São João do Piauí - Instituto Consulpam"
+ORGAO = "Prefeitura Municipal de São João do Piauí - PI"
+ORGANIZADORA = "Instituto Consulpam"
+EDITAL = "Processo Seletivo 2026 - Editais nº 003, 004 e 005/2026"
 PRAZO = "09/11/2026, às 23h59 (horário de Brasília)"
+
+from editais_map import CARGO_EDITAL  # noqa: E402
+
+_EDITAL_NOMES = {
+    "003": "Edital nº 003/2026 - Cargos Gerais",
+    "004": "Edital nº 004/2026 - Magistério",
+    "005": "Edital nº 005/2026 - ACE e ACS",
+}
+
+
+def edital_do_cargo(cargo: str) -> str:
+    t = re.sub(r"\s*-\s*R\$\s*[\d.,]+\s*$", "", cargo or "")
+    t = re.sub(r"\s*-\s*\d+\s*vaga\(s\)\s*$", "", t, flags=re.I)
+    t = re.sub(r"^\s*\d+\s*-\s*", "", t).strip().upper()
+    m = re.match(r"^\s*(00[345])-\d+", cargo or "")
+    ed = CARGO_EDITAL.get(t) or (m.group(1) if m else "")
+    return _EDITAL_NOMES.get(ed, "")
 
 
 def concurso_de(cargo: str):
-    if "SELETIVO" in (cargo or "").upper() or "TESTE" in (cargo or "").upper():
-        return ("Processo Seletivo — SMECEL/VG/MT", ORGAO, "Processo Seletivo · Concurso Várzea Grande - MT")
-    if cargo:
-        return ("Processo Seletivo — SMECEL/VG/MT", ORGAO, "Processo Seletivo · Concurso Várzea Grande - MT")
-    return ("Processo Seletivo SMECEL/VG/MT", ORGAO, EDITAL)
+    ed = edital_do_cargo(cargo) if cargo else ""
+    return ("Processo Seletivo 2026 – São João do Piauí/PI", ORGAO, ed or EDITAL)
 
 # ----------------------------------------------------------------------------
 # Guardrail gate (copiado do playbook — chamar em todo envio)
@@ -215,10 +229,10 @@ def _hoje() -> str:
 def _shell(inner: str, base: str = "", cargo: str = "") -> str:
     titulo, orgao, edital = concurso_de(cargo)
     base = _safe_base(APP_PUBLIC_URL, base)
-    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/assets/selecon-logo.png" if base else "")
+    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/assets/consulpam-banner.jpg" if base else "")
     logo = (
-        f'<img src="{escape(logo_url)}" width="200" alt="Concurso Várzea Grande - MT" '
-        'style="display:block;margin:0 auto 16px;width:200px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none" />'
+        f'<img src="{escape(logo_url)}" width="536" alt="Instituto Consulpam" '
+        'style="display:block;margin:0 auto 16px;width:100%;max-width:536px;height:auto;border:0;outline:none;text-decoration:none" />'
         if logo_url else ""
     )
     return (
@@ -286,7 +300,7 @@ def build_inscricao_email_html(*, nome: str, cpf: str, protocolo: str, cargo: st
     rows += _row("CPF:", f"{_c[:3]}.{_c[3:6]}.{_c[6:9]}-{_c[9:]}" if len(_c) == 11 else (cpf or "-"))
     if cargo:
         rows += _row("Cargo:", cargo)
-    rows += _row("Concurso:", " - ".join(concurso_de(cargo)[1:]).replace(" · Organização: Concurso Várzea Grande - MT", ""))
+    rows += _row("Concurso:", " - ".join(concurso_de(cargo)[1:]))
     rows += _row("Valor da inscrição:", _fmt_valor(valor))
     primeiro = escape(nome.split()[0].capitalize()) if (nome or "").strip() else "candidato(a)"
     inner = (
@@ -351,9 +365,9 @@ def build_cadastro_email_html(*, nome: str, cpf: str, nascimento: str, email: st
                               cidade: str, base_url: str = "", sessao: str = "") -> str:
     base = _safe_base(APP_PUBLIC_URL, base_url)
     finalizar = f"{base}/dados-inscricao.html?sessao={sessao}" if base and sessao else ""
-    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/assets/selecon-logo.png" if base else "")
-    logo = (f'<img src="{escape(logo_url)}" width="250" alt="Concurso Várzea Grande - MT" style="display:block;margin:0 auto;width:250px;max-width:80%;height:auto;border:0" />'
-            if logo_url else '<div style="font-size:32px;font-weight:bold;color:#1b3c82">Concurso Várzea Grande - MT</div>')
+    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/assets/consulpam-banner.jpg" if base else "")
+    logo = (f'<img src="{escape(logo_url)}" width="536" alt="Instituto Consulpam" style="display:block;margin:0 auto;width:100%;max-width:536px;height:auto;border:0" />'
+            if logo_url else '<div style="font-size:32px;font-weight:bold;color:#1b3c82">Instituto Consulpam</div>')
     p = 'margin:0 0 18px;font-size:16px;color:#2b3a4a;line-height:1.5'
     s = 'margin:0 0 18px;font-size:15px;color:#333;line-height:1.7;text-align:justify'
     hl = ('margin:0 0 22px;font-size:20px;font-weight:bold;color:#ff0000;line-height:1.6;text-decoration:underline;'
@@ -390,6 +404,6 @@ def build_cadastro_email_html(*, nome: str, cpf: str, nascimento: str, email: st
         '<tr><td align="center" style="padding:28px 24px 8px;font-size:13px;color:#444;line-height:1.6">'
         'Esta mensagem é automática. Por segurança, nunca solicitamos senha, código ou dados de cartão por e-mail.'
         + (f'<br><br>Dúvidas? Fale com a gente em <a href="mailto:{escape(CONTATO_EMAIL)}" style="color:#1b3c82;text-decoration:none">{escape(CONTATO_EMAIL)}</a>.' if CONTATO_EMAIL else '')
-        + '<br><br>Enviado por <strong>Concurso Várzea Grande - MT.</strong></td></tr></table>'
+        + '<br><br>Enviado por <strong>Instituto Consulpam - Seletivo São João do Piauí.</strong></td></tr></table>'
         '</td></tr></table>'
     )
