@@ -1,0 +1,40 @@
+{
+  "summary": "Tested whether home-page visits are tracked. Reproduced the bug: the fix E1 injected into inicio.html did NOT work in a real browser. The page's own CSP meta (default-src 'none' with no connect-src) blocked fetch('/api/track/access') ('Refused to connect because it violates the document's Content Security Policy'), so no request reached the backend. I fixed it by adding connect-src 'self' to the CSP meta in inicio.html. Retested: a fresh headless Chrome visit to / created an accesses doc (visitor_id v_mw28gy05_u3eja6qh, page '/'), a reload within 30 min was deduplicated, and the realtime feed showed 'Novo acesso desktop - Council Bluffs/IA'. Logged in to /donaspainel as donas: the ACESSOS card, funnel 'Acessos ao site' and 'Atividade em tempo real' all show the access. Backend track/access tests pass 6/6. Other admin dashboard routes return 200, and 401 without auth.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/track/access", "issue": "The 'access' events in db.events are not linked to the accesses doc (no visitor_id/access id). After deleting test accesses, their 'Novo acesso' events stay in the realtime feed, so the feed can show more items than the ACESSOS count."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "inicio.html CSP meta", "issue": "ROOT CAUSE of the reported bug: CSP default-src 'none' without connect-src blocked the tracking fetch. FIXED by tester (added connect-src 'self').", "selector": "meta[http-equiv=content-security-policy]", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "inicio.html", "issues": ["The same CSP also blocks /assets/mobile.css?v=3 (style-src 'unsafe-inline' has no 'self'), so mobile styles may not load. It also blocks Cloudflare beacon/challenge scripts. Consider adding 'self' to style-src (and script-src if external scripts are needed)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_track_access.py", "/app/test_reports/pytest/track_access.xml"],
+  "action_items": [
+    "Keep the connect-src 'self' addition in /app/frontend/public/inicio.html CSP meta. If inicio.html is regenerated from SingleFile or the .bak, re-add it.",
+    "Add 'self' to style-src in the inicio.html CSP so /assets/mobile.css loads (currently blocked).",
+    "Optional: store visitor_id in access events so the realtime feed matches the accesses collection."
+  ],
+  "critical_code_review_comments": [
+    "Any fetch-based tracker on a page with a restrictive CSP meta must check connect-src. E1's fix missed this, so the tracker failed silently (.catch swallowed the error).",
+    "The tracker swallows all errors silently. That is fine for production, but it hid this bug.",
+    "admin_routes.py is >2000 lines and should be split into modules."
+  ],
+  "updated_files": [
+    "/app/frontend/public/inicio.html (CSP meta: added connect-src 'self')",
+    "/app/backend/tests/test_track_access.py (replaced outdated '__ceb_tracker' assertion with 'visitor_id')"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100% after CSP fix (0% before)"},
+  "seed_data_creation": "pytest created 3 accesses (test_visitor_*); I deleted them by exact visitor_id. Their 3 'Novo acesso desktop' events remain in db.events. One real browser access (visitor_id v_mw28gy05_u3eja6qh, Council Bluffs) was kept as evidence. One pre-existing 'v_test_123' (curl-test) access from E1 also remains.",
+  "test_credentials": "Admin donas / Seinao10@@ (/app/memory/test_credentials.md is missing)",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The tracker is inline JS at the end of inicio.html and posts {page, user_agent, extra:{visitor_id}}. Visits dedupe per visitor_id for 30 min. To check the browser flow, listen for console messages about CSP 'track/access' and query db.accesses by the visitor_id from localStorage. The browser_automation harness navigates to page_url before the script runs, so the first track request happens before your script starts.",
+  "rca of the issue": "Reproduction: open / in Chrome. The console shows 'Connecting to .../api/track/access violates the following Content Security Policy directive: default-src none' and no request is sent. Cause: the SingleFile-saved inicio.html has a CSP meta with default-src 'none' and no connect-src, so fetch falls back to 'none'. Mitigation: add connect-src 'self' (applied, verified end-to-end)."
+}

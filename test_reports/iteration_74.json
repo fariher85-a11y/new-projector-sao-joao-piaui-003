@@ -1,0 +1,30 @@
+{
+  "summary": "Unit-tested _build_telegram_message (admin_routes.py) by importing it directly. 14 tests, 11 pass. All 4 requested scenarios pass (concurso PMPE_26/CBMPE_26 + cargo, cargo-only Bombeiros, cargo-only Polícia Militar). A custom telegram_titulo still overrides the title, and an empty one does not. Body fields (nome, CPF format, BRT data/hora, device, local, valor R$ 90,00, status emoji) show no regressions. Real stored docs ('PMPE 2026 - Instituto AOCP' / 'CBMPE 2026 - Instituto AOCP') get the right title. 3 edge-case failures: the code does not do what the review request describes, and the real inscricoes doc schema is not fully used.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "_build_telegram_message (admin_routes.py:1607-1614)", "issue": "Gets the title wrong on the fallback concurso text. finalizar.js:21 and confirmacao.html:862 send concurso='PMPE / CBMPE 2026 - Instituto AOCP' when d.__concurso is missing. That string contains 'CBMPE', so PMPE inscriptions get the title 'NOVA INSCRIÇÃO - CBMPE'."},
+      {"endpoint": "_build_telegram_message", "issue": "Ignores the 'edital' field ('PMPE_26'/'CBMPE_26'), which is the most reliable indicator. Also ignores 'cargo_titulo', the field where track_registration (admin_routes.py:367) actually stores the cargo. The code reads 'cargo'/'vaga_label', which the inscricoes docs do not have. So a doc with only edital='CBMPE_26' + cargo_titulo='...Bombeiros...' gets the title 'NOVA INSCRIÇÃO - PMPE / CBMPE'."},
+      {"endpoint": "_build_telegram_message", "issue": "The fallback does not match the spec. With no concurso and no cargo, the title is 'NOVA INSCRIÇÃO - PMPE / CBMPE', but the review request says it should fall back to 'NOVA INSCRIÇÃO - PMPE'."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_telegram_title_pmpe_cbmpe.py", "/app/test_reports/pytest/pytest_results_iter74.xml"],
+  "action_items": [
+    "Use insc['edital'] first: CBMPE if 'CBMPE' in edital, else PMPE if edital is 'PMPE_26'.",
+    "Next, check cargo_titulo for 'BOMBEIRO' (add it to the cargo_raw sources alongside cargo/vaga_label).",
+    "Only then look at the concurso text, treating the combined 'PMPE / CBMPE' string as ambiguous, for example by checking it starts with 'CBMPE'.",
+    "Make the final fallback 'PMPE' as the spec says, or update the spec."
+  ],
+  "critical_code_review_comments": [
+    "admin_routes.py is over 2100 lines; it should be split into smaller modules.",
+    "The old tests in tests/test_telegram_notifications.py still reference 'SEDUC AL 2026' and are out of date."
+  ],
+  "updated_files": ["/app/backend/tests/test_telegram_title_pmpe_cbmpe.py"],
+  "success_rate": {"backend": "79% (11/14; all 6 requested items pass, 3 edge cases fail)", "frontend": "N/A"},
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run: cd /app/backend && pytest tests/test_telegram_title_pmpe_cbmpe.py. The 3 failing tests (fallback_concurso_text_with_pmpe_edital, edital_cbmpe_only, no_indicator_fallback) should pass after the fix. settings.main in the DB has no telegram_titulo set, so the dynamic title is what users see in production.",
+  "rca of the issue": "Detection relies on substring matches in 'concurso' and in 'cargo'/'vaga_label'. The inscricoes docs store 'concurso' (sometimes the combined fallback text), 'edital' and 'cargo_titulo'. Because 'CBMPE' is checked first and the combined text contains it, PMPE inscriptions are misdetected. edital and cargo_titulo are never read."
+}

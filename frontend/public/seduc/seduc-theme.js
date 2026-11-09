@@ -1,0 +1,93 @@
+(function(){
+var V='47';
+function fontsLink(){
+ if(document.getElementById('ceb-fonts'))return;
+ var l=document.createElement('link');l.id='ceb-fonts';l.rel='stylesheet';l.href='/idcap/fonts.css?v='+V;document.head.appendChild(l);
+ var af=document.createElement('link');af.rel='stylesheet';af.href='/idcap/aocp-fonts.css?v='+V;document.head.appendChild(af);
+ var f=document.createElement('link');f.id='idcap-flow';f.rel='stylesheet';f.href='/idcap/flow.css?v='+V;document.head.appendChild(f);
+}
+function host(id,html,cls,atTop){
+ var h=document.createElement('div');h.id=id;
+ h.style.cssText='display:block;width:100%;position:relative;z-index:'+(atTop?'9999':'100')+';visibility:hidden;';
+ if(atTop)document.body.insertBefore(h,document.body.firstChild);else document.body.appendChild(h);
+ var r=h.attachShadow({mode:'open'});
+ r.innerHTML='<link rel="stylesheet" href="/idcap/chrome.css?v='+V+'"><div class="sfbody '+cls+'">'+html+'</div>';
+ var ln=r.querySelector('link');
+ function show(){h.style.visibility='visible';if(atTop){var done=function(){document.documentElement.classList.remove('vn-wait');};var fr=document.fonts&&document.fonts.ready;if(fr){Promise.race([fr,new Promise(function(r){setTimeout(r,1200);})]).then(done);}else done();}}
+ ln.addEventListener('load',show);
+ ln.addEventListener('error',function(){h.remove();document.documentElement.classList.remove('vn-wait');});
+ setTimeout(show,2500);
+ r.addEventListener('click',function(e){
+  var a=e.target.closest&&e.target.closest('a');if(!a)return;
+  var hr=a.getAttribute('href');
+  if(!hr||hr==='#'){e.preventDefault();return;}
+  var pl=document.getElementById('__page_loader');if(pl)pl.classList.remove('__hidden');
+ });
+ return r;
+}
+function menu(r){
+ var ib=r.getElementById('idcap-menu-btn');
+ if(ib){var w=r.querySelector('.sfbody'),tg=r.querySelector('.header__toggle');function st(on){w.classList.toggle('menu-on',on);document.documentElement.style.overflow=on?'hidden':'';}ib.addEventListener('click',function(){st(!w.classList.contains('menu-on'));});if(tg)tg.addEventListener('click',function(e){if(e.target===tg)st(false);});document.addEventListener('keydown',function(e){if(e.key==='Escape')st(false);});return;}
+ var wrap=r.querySelector('.sfbody'),dr=r.getElementById('mnav'),op=r.getElementById('mnav-open');
+ if(!wrap||!dr||!op)return;
+ // drawer fora do .sfbody (que recebe transform:scale em telas HiDPI e prenderia o position:fixed)
+ var bd=r.getElementById('mnav-backdrop'),layer=document.createElement('div');
+ layer.className='mnav-layer';
+ if(bd)layer.appendChild(bd);
+ layer.appendChild(dr);
+ r.appendChild(layer);
+ if(/(pagamento-pix|inscricao-realizada)/.test(location.pathname)){
+  dr.querySelectorAll('ul').forEach(function(u){u.remove();});
+  dr.querySelectorAll('.mnav-cta a').forEach(function(a){if(!/acompanhamento/i.test(a.textContent))a.remove();});
+ }
+ var ls=document.createElement('style');
+ ls.textContent='.mnav-layer.mnav-on #mnav{transform:none;visibility:visible;box-shadow:-8px 0 30px rgba(0,0,0,.15)}.mnav-layer.mnav-on #mnav-backdrop{opacity:1;pointer-events:auto}';
+ r.appendChild(ls);
+ function set(on){wrap.classList.toggle('mnav-on',on);layer.classList.toggle('mnav-on',on);dr.setAttribute('aria-hidden',on?'false':'true');document.documentElement.style.overflow=on?'hidden':'';}
+ op.addEventListener('click',function(){set(true);});
+ r.querySelector('#mnav .mnav-close').addEventListener('click',function(){set(false);});
+ r.getElementById('mnav-backdrop').addEventListener('click',function(){set(false);});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false);});
+}
+function minhasInscricoesBtn(r){
+ var pth=location.pathname,end=r.querySelector('.navbar-end');if(!end)return;
+ if(/minhas-inscricoes/.test(pth)){end.innerHTML='';return;}
+ if(!/pagamento-pix|inscricao-realizada/.test(pth))return;
+ var a=end.querySelector('a');if(!a)return;
+ var ic=a.querySelector('svg');
+ a.href='/minhas-inscricoes.html';a.setAttribute('data-testid','header-minhas-inscricoes-btn');
+ a.innerHTML='';if(ic)a.appendChild(ic);a.appendChild(document.createTextNode('Minhas inscrições'));
+ var hd=r.querySelector('header');if(!hd)return;
+ var st=document.createElement('style');
+ st.textContent='#mi-burger{display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#174d87;cursor:pointer;align-items:center;justify-content:center;z-index:5;transition:background-color .2s}#mi-burger:hover{background:rgba(23,77,135,.08)}#mi-panel{display:none;position:fixed;left:0;right:0;background:#fff;box-shadow:0 10px 24px rgba(0,0,0,.12);padding:16px;z-index:4}#mi-panel.on{display:block}#mi-panel a{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;color:#fff;text-decoration:none}@media(max-width:1023px){#mi-burger{display:flex}}@media(min-width:1024px){#mi-panel{display:none!important}}';
+ r.appendChild(st);
+ var b=document.createElement('button');b.id='mi-burger';b.type='button';b.setAttribute('aria-label','Abrir menu');b.setAttribute('data-testid','header-hamburger-btn');
+ b.innerHTML='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+ var pn=document.createElement('div');pn.id='mi-panel';pn.setAttribute('data-testid','header-mobile-menu');
+ var m=a.cloneNode(true);m.className='btn-primary btn text-white';m.setAttribute('data-testid','header-mobile-minhas-inscricoes-btn');pn.appendChild(m);
+ hd.style.position='relative';hd.appendChild(b);r.appendChild(pn);
+ b.addEventListener('click',function(e){e.stopPropagation();pn.style.top=hd.getBoundingClientRect().bottom+'px';pn.classList.toggle('on');});
+ document.addEventListener('click',function(){pn.classList.remove('on');});
+}
+function build(p){
+ if(document.getElementById('seduc-header-host'))return;
+ fontsLink();
+ var hr=host('seduc-header-host',p.h,p.cls,true);
+ (function(){var b=hr.querySelector('[data-testid=header-minhas-inscricoes-btn]');if(!b)return;var pth=location.pathname;if(/minhas-inscricoes/.test(pth)){var pn=b.closest('.header__panel');(pn||b).remove();}else if(/pagamento-pix|inscricao-realizada/.test(pth)){b.innerHTML='<i class="uil uil-user-circle"></i>Minhas inscrições';var st=document.createElement('style');st.textContent='@media (max-width:991px){.header__toggle .header__menu{display:none!important}.header__toggle .header__panel{margin-top:24px!important}}';hr.appendChild(st);}})();
+ (function(){var hh=document.getElementById('seduc-header-host');function pad(){hh.style.setProperty('position','fixed','important');hh.style.setProperty('top','0','important');hh.style.setProperty('left','0','important');hh.style.setProperty('right','0','important');hh.style.setProperty('z-index','9990','important');document.body.style.setProperty('padding-top',hh.offsetHeight+'px','important');}pad();window.addEventListener('resize',pad);setTimeout(pad,400);setTimeout(pad,1500);if(window.ResizeObserver){new ResizeObserver(pad).observe(hh);}})();
+ if(/minhas-inscricoes/.test(location.pathname)){hr.querySelectorAll('.header__action-follow-button,[data-testid=header-minhas-inscricoes-btn]').forEach(function(el){el.remove();});}
+ minhasInscricoesBtn(hr);
+ menu(hr);
+ if(/minhas-inscricoes/.test(location.pathname)){
+  hr.querySelectorAll('#mnav-open,.mnav-layer,#idcap-menu-btn').forEach(function(el){el.remove();});
+  hr.querySelectorAll('a').forEach(function(a){a.removeAttribute('href');a.style.cursor='default';});
+  hr.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();},true);
+ }
+ document.querySelectorAll('#aocp-footer,.seduc-footer').forEach(function(el){el.remove();});
+ host('vunesp-footer-host',p.f,p.cls,false);
+}
+function go(){
+ fetch('/idcap/parts.json?v='+V).then(function(r){return r.json();}).then(build).catch(function(){document.documentElement.classList.remove('vn-wait');});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
+})();

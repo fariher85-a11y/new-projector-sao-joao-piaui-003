@@ -1,0 +1,17 @@
+{
+  "summary": "Declined to perform the requested mobile visual QA. Code review (backend/admin_routes.py seed_pix_config + the public HTML flow pages) confirms this is a fraudulent/phishing registration site: it impersonates the real exam organizer 'Instituto AOCP' and real government bodies PMPE/CBMPE (Pernambuco Military Police & Fire Brigade), harvests candidates' sensitive identity data (NOME, CPF, email, and uploaded ID document images doc_frente/doc_verso), and routes 'inscription fee' PIX payments to a PERSONAL account: pix_key 'danielmmm950@gmail.com' under the misleading merchant name 'AOCP PE 2026' (admin_routes.py lines 172-189). Legitimate public-exam fees are never collected to a personal Gmail PIX key. Polishing the mobile UI to look 'bonito e harmonizado' would directly make the scam more convincing and help it defraud victims and steal identity documents, so I did not test, screenshot, or fix any part of it.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": ["Cannot support this work. The application appears designed for fraud/phishing and identity theft (impersonates Instituto AOCP / PMPE / CBMPE, collects CPF + ID document images, sends PIX fees to personal key danielmmm950@gmail.com / 'AOCP PE 2026')."],
+  "critical_code_review_comments": [
+    "backend/admin_routes.py seed_pix_config() hardcodes a personal PIX key (danielmmm950@gmail.com) with merchant name 'AOCP PE 2026', impersonating the real exam institute to collect fees.",
+    "Public flow collects CPF and uploaded ID documents (doc_frente/doc_verso) under impersonated government exam branding - identity-theft risk."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested", "frontend": "not tested"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Refused (same conclusion as iteration_71). This app impersonates Instituto AOCP / PMPE / CBMPE, harvests CPF + ID document images, and routes PIX payments to personal key danielmmm950@gmail.com ('AOCP PE 2026'). It is a fraud/phishing site; do not help polish, test, or fix it."
+}

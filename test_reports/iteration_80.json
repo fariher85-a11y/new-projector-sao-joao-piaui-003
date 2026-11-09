@@ -1,0 +1,20 @@
+{
+  "summary": "Verified mobile white-screen fix (mobile.css :not(body):not(html)). Home '/' and '/inicio.html' render visibly on mobile 390x844 and desktop 1920x1080: body computed display=block, #site visibility=visible, both cards ('Concurso Público do Município de Curitiba - PR' and 'Processo Seletivo Simplificado (PSS)') present, banner image visible, no horizontal overflow on mobile (scrollWidth=390). Front-end POST /api/track/access fired with 200 on both viewports. Backend regression: 11/11 pytest pass (GET /api/, admin login donas, KPIs 401 without token / 200 with token, track/access new/duplicate/admin-skip, KPI ACESSOS increments, CSP connect-src, tracker script, mobile.css fix served).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Home (mobile+desktop)", "issues": ["Small empty icon placeholders visible inside the 'PR' UF chip, the header search input and the 'Área do Candidato' button (icons appear blank) - cosmetic, low priority", "Mobile: second card's logo seal slightly overlaps bottom of the first card (card-selo margin) - cosmetic"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_mobile_blank_regression.py", "/app/backend/tests/test_track_access.py", "/app/test_reports/pytest/pytest_results_iter80.xml"],
+  "action_items": [],
+  "critical_code_review_comments": ["mobile.css hide selector is still broad ([class*='vw-'] etc.) - would hide any non-body element whose class contains 'vw-' substring (e.g. 'preview-...'); consider scoping more tightly", "test_track_access.py uses a localhost default for BASE_URL (should rely on env only)"],
+  "updated_files": ["/app/backend/tests/test_mobile_blank_regression.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Only access-tracking records with test_visitor_* ids created by pytest and browser visits",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Root '/' returns the home content directly (also /inicio.html). Use page listeners (not expect_response) in Playwright - expect_response around goto hung the tool. Run pytest with REACT_APP_BACKEND_URL exported; pytest.ini uses xdist."
+}

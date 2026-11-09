@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta charset="utf-8"/>
+
+<title>Área do Candidato | Selecon</title>
+<link href="/seduc/seduc-theme.css?v=11" rel="stylesheet"/><script src="/seduc/seduc-theme.js?v=49"></script>
+<style>
+:root{--g:#1172db;--gd:#0b4f9c;--ink:#0b4f9c;--bd:#e6f0e9;--mut:#6b7a90;--bg:#eef5fd}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#1f2a3a}
+.wrap{max-width:1032px;margin:28px auto;padding:0 16px}
+.card{background:#fff;border:1px solid var(--bd);border-radius:18px;box-shadow:0 6px 22px rgba(23,52,92,.06);overflow:hidden;margin-bottom:22px}
+.edhead{background:#1172db;padding:14px 24px}.edhead h3{color:#fff!important;font-family:"OpenSans-Semibold",Helvetica,Arial,sans-serif}
+.edhead h3{margin:0;color:var(--ink);font-size:20px}
+.edbody{display:flex;gap:20px;padding:22px 24px;flex-wrap:wrap}
+.edbody img{width:150px;height:auto;border-radius:10px;flex:0 0 auto}
+.edtxt{font-size:15px;color:#2b3a4f;line-height:1.5}
+h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4px}
+.sub{color:var(--mut);font-size:14px;margin:0 0 16px;padding:0 4px}
+/* --- Grid responsivo dos cards de inscrição --- */
+#lista{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){#lista{grid-template-columns:1fr 1fr}}
+.insc{cursor:pointer;background:#fff;border:1px solid var(--bd);border-radius:14px;box-shadow:0 3px 10px rgba(23,52,92,.05);padding:14px 16px;transition:transform .15s ease,box-shadow .2s ease,border-color .2s;display:flex;flex-direction:column;gap:8px;position:relative}
+.insc:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(23,52,92,.12);border-color:var(--g)}
+.insc .top{display:flex;align-items:center;gap:10px;border-bottom:1px solid #eef1f4;padding-bottom:10px}
+.insc .top img.logo{width:34px;height:34px;object-fit:contain;border-radius:6px;flex:0 0 34px}
+.insc .top .numwrap{flex:1;min-width:0;line-height:1.1}
+.insc .top .numwrap .lbl{display:block;font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.insc .top .numwrap .num{display:block;font-size:16px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{background:#fff3cd;color:#856404;border:1px solid #ffeaa7;border-radius:999px;padding:3px 9px;font-weight:700;font-size:10px;letter-spacing:.3px;white-space:nowrap}
+.badge.ok{background:#d4edda;color:#155724;border-color:#c3e6cb}
+.insc .body{display:grid;grid-template-columns:1fr;gap:2px;font-size:13px}
+.insc .body .nome{font-weight:700;color:#17243a;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insc .body .meta{color:var(--mut);font-size:12px}
+.insc .body .cargo{color:#2b3a4f;font-size:12.5px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.insc .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;padding-top:8px;border-top:1px solid #eef1f4}
+.insc .foot .concurso{background:#eef5fd;color:var(--ink);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700}
+.insc .foot .concurso.cbmpe{background:#ffe8e0;color:#b03a1a}
+.insc .foot .valor{font-weight:800;color:var(--ink);font-size:14px}
+.insc .foot .arrow{color:var(--g);font-size:16px;font-weight:800}
+.busca{background:#fff;border:1px solid #ddd;border-radius:4px;padding:18px 20px;margin:0 0 18px}
+.busca label{display:block;font-weight:700;color:#17243a;margin-bottom:8px;font-size:14px}
+.busca .f{display:flex;gap:10px;flex-wrap:wrap}
+.busca input{flex:1 1 220px;padding:12px 14px;border:1.5px solid #cdd5e1;border-radius:8px;font-size:16px}
+.busca button{background:#3576fb;color:#fff;border:0;border-radius:8px;padding:12px 26px;font-weight:700;font-size:15px;cursor:pointer}
+.busca button:hover{background:#1f5ad6}
+.busca .msg{margin-top:10px;font-size:14px;color:#c62828;display:none}
+.acoes-mi{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:28px}
+.acoes-mi .back{margin-top:0!important}
+.back.nova{background:#3576fb!important;color:#fff!important;border-color:#3576fb!important}
+.back{display:inline-block;margin-top:18px;background:#fff;border:1.6px solid #cdd5e1;color:#334155;border-radius:12px;padding:13px 26px;font-weight:700;cursor:pointer;text-decoration:none}
+.back:hover{border-color:var(--g);color:var(--gd)}
+.card{border:1px solid #ddd;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.edhead{background:#1172db;border-bottom:0;padding:12px 18px}
+.edhead h3{font-size:23px;font-weight:400;color:#fff!important;line-height:1.3;font-family:"OpenSans-Regular",Helvetica,Arial,sans-serif}
+.edbody{padding:18px;gap:22px;align-items:flex-start}
+.edbody img{width:190px;border-radius:0}
+.edtxt{color:#333;line-height:1.7}
+@media(max-width:640px){
+  html body:not(#vn_a):not(#vn_b):not(#vn_c):not(#vn_d) .wrap .card .edhead h3{font-size:22px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap{margin-bottom:0!important}
+  .insc{padding:12px 14px}
+  .insc .top .numwrap .num{font-size:15px}
+  .insc .body .nome{font-size:13px}
+  .edhead{padding:7px 10px}
+  .edhead h3{font-size:12px;line-height:1.25}
+  .edbody{flex-direction:column;gap:8px;align-items:center;padding:10px}
+  .edbody img{width:80px}
+  .edtxt{font-size:11px;line-height:1.4}
+}
+</style><style>html body .aocp-edital-card{width:auto!important;max-width:none!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box!important}@media(max-width:767px){html body .vn-lgpd{text-align:left!important;padding:12px 14px!important;font-size:13px!important}}</style><link href="/vunesp/pages.css?v=9" rel="stylesheet"/><style>html.vn-wait body{opacity:0!important}html body{transition:opacity .15s ease}</style><script>document.documentElement.classList.add("vn-wait");setTimeout(function(){document.documentElement.classList.remove("vn-wait")},2500);</script><style>@media(max-width:767px){html body:not(#vn_a):not(#vn_b) .Miolo,html body:not(#vn_a):not(#vn_b) .wrap{padding-left:8px!important;padding-right:8px!important;margin-left:0!important;margin-right:0!important;max-width:none!important}html body:not(#vn_a):not(#vn_b) #pgInformacoes,html body:not(#vn_a):not(#vn_b) .blocoPadrao .dados,html body:not(#vn_a):not(#vn_b) #TopoInformacoes{padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important}html body:not(#vn_a):not(#vn_b) .blocoPadrao{padding-left:12px!important;padding-right:12px!important;margin-left:0!important;margin-right:0!important;max-width:none!important}html body:not(#vn_a):not(#vn_b) .wrap .insc,html body:not(#vn_a):not(#vn_b) #lista>div{padding-left:14px!important;padding-right:14px!important}}</style><link rel="stylesheet" href="/assets/mobile.css?v=3"></head><body>
+<div class="wrap">
+<h1 class="t">Minhas inscrições</h1>
+<p class="sub" id="sub-txt">Consulte sua inscrição pelo CPF.</p>
+<form class="busca" data-testid="busca-cpf-form" id="busca-cpf">
+<label for="cpf-busca">CPF do candidato</label>
+<div class="f"><input data-testid="busca-cpf-input" id="cpf-busca" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required=""/><button data-testid="busca-cpf-btn" type="submit">Consultar</button></div>
+<div class="msg" data-testid="busca-cpf-msg" id="busca-msg"></div>
+</form>
+<div id="lista"></div>
+<a data-testid="btn-consultar-outro-cpf" href="#" id="outro-cpf" style="display:none;margin-top:14px;color:#3576fb;font-weight:700;font-size:14px;text-decoration:none">Consultar outra inscrição pelo CPF</a><br/>
+<div class="acoes-mi"><a class="back" data-testid="btn-voltar" href="/inscricao-realizada.html">← Voltar</a><a class="back nova" data-testid="btn-nova-inscricao" href="/dados-inscricao.html?c=todos" id="btn-nova-inscricao" style="display:none">+ Nova Inscrição</a></div>
+</div>
+<script>
+(function(){
+  // remove SAIR do header injetado (somente a logo permanece)
+  var n=0,t=setInterval(function(){var h=document.getElementById('aocp-header-host');var lo=h&&h.shadowRoot&&h.shadowRoot.getElementById('logout');if(lo){lo.style.display='none';clearInterval(t);}if(++n>40)clearInterval(t);},100);
+  var lista=document.getElementById('lista');
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function card(d,href){
+    var insc=d.protocolo||('2026'+String(d.cpf||'').replace(/\D/g,'').slice(-6).padStart(6,'0'));
+    var isCbm=(String(d.edital||'')==='CONCURSO_CURITIBA_26')||/CBMPE|Bombeiro/i.test(String(d.concurso||'')+' '+String(d.cargo||''));
+    var logo=isCbm?'/assets/sjp-logo.jpg':'/assets/sjp-logo.jpg';
+    var cName=isCbm?'Processo Seletivo 2026 – São João do Piauí/PI':'Processo Seletivo 2026 – São João do Piauí/PI';
+    var cClass=isCbm?'cbmpe':'';
+    var pago=/pago|pag(a|o)|conclu/i.test(String(d.status||''));
+    var badgeTxt=pago?'PAGO':'PENDENTE DE PAGAMENTO';
+    var badgeCls=pago?'badge ok':'badge';
+    var el=document.createElement('div');el.className='insc';el.setAttribute('data-testid','card-inscricao');
+    el.onclick=function(){location.href=href;};
+    el.innerHTML=
+      '<div class="top">'
+       +'<img class="logo" src="'+esc(logo)+'" alt="" loading="lazy">'
+       +'<div class="numwrap"><span class="lbl">Protocolo</span><span class="num">N&ordm; '+esc(insc)+'</span></div>'
+       +'<span class="'+badgeCls+'">'+badgeTxt+'</span>'
+      +'</div>'
+      +'<div class="body">'
+       +'<div class="nome" title="'+esc(d.nome||'')+'">'+esc(d.nome||'-')+'</div>'
+       +'<div class="meta">CPF '+esc(d.cpf||'-')+'</div>'
+       +'<div class="cargo" title="'+esc(d.cargo||'')+'">'+esc(d.cargo||'-')+'</div>'
+      +'</div>'
+      +'<div class="foot">'
+       +'<span class="concurso '+cClass+'">'+esc(cName)+'</span>'
+       +'<span class="valor">'+esc(d.taxa||'-')+'</span>'
+       +'<span class="arrow">&rarr;</span>'
+      +'</div>';
+    lista.appendChild(el);
+  }
+  var d={};try{d=JSON.parse(localStorage.getItem('inscricao_dados')||'{}');}catch(e){}
+  var inp=document.getElementById('cpf-busca'),msg=document.getElementById('busca-msg'),form=document.getElementById('busca-cpf');
+  if(d&&d.CPF&&(d.__protocolo||d.__finalizado_ok)){
+    var localCargo=String(d.__cargo_codigo||d.VAGA||''),localEdital=String(d.__edital||'CONCURSO_CURITIBA_26');
+    function cname(ed){return ed==='CONCURSO_CURITIBA_26'?'Processo Seletivo 2026 – São João do Piauí/PI':'Processo Seletivo 2026 – São João do Piauí/PI';}
+    card({protocolo:d.__protocolo,nome:d.NOME,cpf:d.CPF,concurso:cname(localEdital),edital:localEdital,cargo:d.__vaga_label||d.VAGA,taxa:d.__taxa,status:d.__pix_status||d.__status||''},'/inscricao-realizada.html');
+    var cpfD=String(d.CPF).replace(/\D/g,'');
+    fetch('/api/inscricao/lista/'+cpfD).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j||!j.items||!j.items.length)return;
+      lista.innerHTML='';
+      j.items.forEach(function(it){
+        var mine=String(it.cargo_codigo)===localCargo&&String(it.edital||'CONCURSO_CURITIBA_26')===localEdital;
+        card({protocolo:it.protocolo,nome:it.nome,cpf:d.CPF,concurso:cname(it.edital),edital:it.edital,cargo:it.cargo_titulo,taxa:it.taxa,status:it.status||it.pix_status||''}, mine?'/inscricao-realizada.html':'/pagamento-pix.html?cpf='+cpfD+'&cargo='+encodeURIComponent(it.cargo_codigo)+'&edital='+encodeURIComponent(it.edital||''));
+      });
+    }).catch(function(){});
+    var nb=document.getElementById('btn-nova-inscricao');nb.style.display='inline-flex';
+    nb.addEventListener('click',function(e){
+      e.preventDefault();
+      try{
+        var x=JSON.parse(localStorage.getItem('inscricao_dados')||'{}');
+        Object.keys(x).forEach(function(k){ if(k.charAt(0)==='_'&&k.charAt(1)==='_') delete x[k]; });
+        ['VAGA','MUNICIPIO_PROVA','UF_PROVA','PORTADOR_DEFICIENCIA','atendimento_especial','termo','aceito_termos'].forEach(function(k){ delete x[k]; });
+        x.__nova=1;
+        localStorage.setItem('inscricao_dados',JSON.stringify(x));
+        sessionStorage.setItem('nova_inscricao','1');
+      }catch(_){}
+      location.href='/inicio.html';
+    });
+    form.style.display='none';
+    document.getElementById('sub-txt').textContent='Esta é a inscrição feita neste navegador. Clique nela para ver os detalhes e o pagamento.';
+    var lk=document.getElementById('outro-cpf');lk.style.display='inline-block';
+    lk.addEventListener('click',function(e){e.preventDefault();form.style.display='block';lk.style.display='none';document.getElementById('sub-txt').textContent='Consulte sua inscrição pelo CPF.';inp.focus();});
+  }
+  inp.addEventListener('input',function(){var v=inp.value.replace(/\D/g,'').slice(0,11);inp.value=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');});
+  document.getElementById('busca-cpf').addEventListener('submit',function(e){
+    e.preventDefault();msg.style.display='none';
+    var cpf=inp.value.replace(/\D/g,'');
+    if(cpf.length!==11){msg.textContent='Informe um CPF válido com 11 dígitos.';msg.style.display='block';return;}
+    fetch('/api/inscricao/lista/'+cpf).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j||!j.items||!j.items.length){lista.innerHTML='';msg.textContent='Nenhuma inscrição encontrada para este CPF.';msg.style.display='block';return;}
+      var fc=cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+      lista.innerHTML='';
+      j.items.forEach(function(it){ card({protocolo:it.protocolo,nome:it.nome,cpf:fc,concurso:it.edital==='CONCURSO_CURITIBA_26'?'Processo Seletivo 2026 – São João do Piauí/PI':'Processo Seletivo 2026 – São João do Piauí/PI',edital:it.edital,cargo:it.cargo_titulo,taxa:it.taxa,status:it.status||it.pix_status||''},'/pagamento-pix.html?cpf='+cpf+'&cargo='+encodeURIComponent(it.cargo_codigo)+'&edital='+encodeURIComponent(it.edital||'')); });
+    }).catch(function(){msg.textContent='Não foi possível consultar agora. Tente novamente.';msg.style.display='block';});
+  });
+})();
+</script>
+</body></html>

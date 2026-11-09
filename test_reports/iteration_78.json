@@ -1,0 +1,41 @@
+{
+  "summary": "Backend-only unit testing of the email From-name feature. Mocked httpx.AsyncClient.post in email_service and captured the JSON body sent to Resend to verify the `from` header for every from_name scenario, the fallback, reply_to handling, and the _from_name_inscricao helper. Also verified all 4 admin_routes callsites are wired with the correct from_name. 14/14 pytest tests passed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_email_from_name.py",
+    "/app/test_reports/pytest/email_from_name.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "File reference line numbers in the review request are slightly off (cadastro is admin_routes.py:436 not 413; inscricao is :421 not :428; reminders :2036/:2108), but the from_name wiring itself is 100% correct.",
+    "email_service.py (385 lines) and admin_routes.py (2116 lines) are large; admin_routes.py in particular exceeds the 700-line guideline and would benefit from modular splitting (not blocking)."
+  ],
+  "verified_behaviours": [
+    "send_email/try_send_email build body['from'] = '<display_name> <email_only>' — email extracted from RESEND_FROM whether plain ('contato@concursoamapa.online') or wrapped ('Name <...>').",
+    "from_name='Instituto AOCP' -> 'Instituto AOCP <...@concursoamapa.online>'",
+    "from_name='Inscrição Polícia Militar PE' / 'Inscrição Bombeiro Militar PE' / 'Inscrição Pendente' all produce the exact expected 'Name <contato@concursoamapa.online>' header.",
+    "No from_name -> falls back to EMAIL_FROM_NAME ('Instituto AOCP').",
+    "_from_name_inscricao: PMPE->Policia, CBMPE->Bombeiro, cargo 'Corpo de Bombeiros'->Bombeiro (even with empty concurso), ''/'' -> Policia (default).",
+    "reply_to included only when EMAIL_REPLY_TO is a valid email; current placeholder env value ('não sei o que é isso') is correctly ignored (EMAIL_REPLY_TO is None).",
+    "try_send_email returns True on success (mocked 200) and False for invalid recipient.",
+    "admin_routes callsites: cadastro='Instituto AOCP', inscricao=_from_name_inscricao(concurso,cargo), ultimo dia & lembrete='Inscrição Pendente'."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_email_from_name.py (new regression test; used asyncio.run wrapper since pytest-asyncio is not installed in this env)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "N/A (backend-only request)"},
+  "seed_data_creation": "None. Tests fully mocked httpx; no real emails sent, no DB writes.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Regression suite at /app/backend/tests/test_email_from_name.py. Note pytest-asyncio is NOT installed here; async tests use a local @sync decorator wrapping asyncio.run. Resend BYOK is active (RESEND_API_KEY + RESEND_FROM='contato@concursoamapa.online'). EMAIL_REPLY_TO/APP_PUBLIC_URL hold placeholder text and are intentionally ignored by the validators.",
+  "rca of the issue": "Original bug: RESEND_FROM held a bare email with no display-name, and the From header only applied EMAIL_FROM_NAME when RESEND_FROM used the '<email>' wrapped format, so all emails showed 'contato'. Fix (verified working): email_service now always extracts email_only from RESEND_FROM and builds '{display_name} <{email_only}>' using per-email-type from_name values passed from admin_routes. Confirmed via mocked Resend POST body assertions."
+}

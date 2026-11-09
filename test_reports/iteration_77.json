@@ -1,0 +1,20 @@
+{
+  "summary": "Tested the mobile-only font-size reduction on /termos.html (?c=pmpe and ?c=cbmpe) with Playwright at 390x844, 375x667 and 1400x900. Every requested check passed. Mobile: all 4 .termos-lista li are 12.48px (0.78rem), line-height 16.85px (1.35), padding 9.6px 12px 9.6px 38.4px. The ::before badge is 20.8x20.8px (1.3rem). .termos-lead is 14.4px and .termos-aceite is 13.12px. Nothing overflows (scrollWidth == clientWidth, li scrollWidth <= clientWidth) and all 4 items are fully readable. Desktop 1400x900 is unchanged: li 15.2px (0.95rem, the original base value), badge 24px, lead 17.6px, aceite 15.2px. Brasões render at both viewports (pmpe-logo.jpg naturalWidth 300, cbmpe-logo.jpg naturalWidth 80). No JS page errors or console errors. One minor cosmetic issue on mobile: the number badge sits about 8px higher than the first line of text.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "termos.html mobile .termos-lista li::before", "issue": "The mobile rule sets top:.6rem but does not reset the base transform:translateY(-50%). The badge is moved up by a further 10.4px: its top lands at about -0.8px (just above the li's top edge) and its center sits about 8px above the center of the first text line. This is visible in the screenshots: the badges look higher than the text. Fix: add transform:none to `.termos-lista li::before` inside @media (max-width:767px), or keep top:50% and drop the top:.6rem override.", "selector": ".termos-lista li::before", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": ["(Optional, LOW) Add transform:none to the mobile `.termos-lista li::before` rule so the number badge lines up with the first line of text."],
+  "critical_code_review_comments": ["The mobile ::before override sets top but inherits transform:translateY(-50%) from the base rule, so the badge is misaligned."],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100% of requested checks (1 low cosmetic issue)"},
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "/termos.html never reaches networkidle (it keeps a connection open, probably the chat widget), so use wait_until='load'. Base desktop li font-size is 0.95rem (15.2px), not 1rem. The mobile overrides are in @media (max-width:767px) in /app/frontend/public/termos.html."
+}

@@ -1,0 +1,26 @@
+{
+  "summary": "Tested the mobile layout of the homepage (/ and /inicio.html) with Playwright at 375x667, 390x844, 393x851 and 414x896, plus a desktop check at 1920x900. The overflow bug is fixed. On every mobile viewport documentElement.scrollWidth equals clientWidth and no element sits past the viewport edge. Both cards span 16px to vw-16px. PMPE title wraps cleanly (45px tall) and CBMPE title wraps to 2 lines (66px), with no clipping. Both Acessar buttons stay inside their cards and the viewport. Logos load at 80px on mobile and 100px on desktop. The h2 is centered and not clipped, and all 3 footers have scrollWidth equal to clientWidth. Desktop still shows the 2-column grid with cards side by side (340-950 and 970-1580). Root '/' serves the same content (path stays '/', as in iteration_73). Acessar goes to /pmpe.html and /cbmpe.html on mobile.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Homepage cards (mobile <=640px)", "issues": ["The card description is cut off with an ellipsis on all mobile widths (e.g. 'Concurso Público nº 001/2026 - Polícia Militar de Pernambu...'), so the full text is hidden. The cause is .ic-card-desc {white-space:nowrap; overflow:hidden; text-overflow:ellipsis}. Optional: add white-space:normal inside @media(max-width:640px) so it wraps."]},
+      {"screen": "Header (mobile)", "issues": ["Only the logo is visible in the mobile header. No hamburger or menu toggle was detected, so the nav links cannot be reached on mobile. This may match the original site; out of scope for this bug."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Optional: let .ic-card-desc wrap on mobile (white-space:normal) so the full description shows instead of being cut off."
+  ],
+  "critical_code_review_comments": [
+    "inicio.html has two duplicate <meta name=viewport> tags. Harmless, but one could be removed.",
+    "The page never reaches the Playwright 'networkidle' state (constant background requests). Tests must use wait_until='load'."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Mobile responsive fix verified at 375/390/393/414 widths plus desktop 1920. Card testids: concurso-pmpe, concurso-cbmpe (classes .ic-card-title, .ic-card-btn, .ic-card-desc). The page has 3 <footer> elements. Use wait_until='load', not 'networkidle'."
+}
